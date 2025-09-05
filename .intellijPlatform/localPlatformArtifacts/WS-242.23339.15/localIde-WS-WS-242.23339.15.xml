@@ -1,0 +1,10 @@
+<ivy-module version="2.0">
+  <info organisation="localIde" module="WS" revision="WS-242.23339.15"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="Applications/WebStorm.app/Contents" ext="directory" conf="default"/>
+  </publications>
+  <dependencies/>
+</ivy-module>

@@ -1,0 +1,59 @@
+<idea-plugin>
+  <depends>com.intellij.modules.platform</depends>
+  <resource-bundle>messages.PromptPackBundle</resource-bundle>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Оставим два notificationGroup, чтобы совместимо с кодом было и старое, и новое -->
+    <notificationGroup id="PromptPack" displayType="BALLOON" isLogByDefault="true"/>
+    <notificationGroup id="Open Tabs Tools" displayType="BALLOON" isLogByDefault="true"/>
+
+    <applicationConfigurable
+            id="dev.promptpack"
+            displayName="%configurable.name%"
+            instance="dev.promptpack.PromptPackConfigurable"/>
+  </extensions>
+
+  <actions>
+    <action id="PromptPack.CopySelectedItemsContents"
+            class="dev.promptpack.CopySelectedItemsContentsAction">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt C"/>
+    </action>
+
+    <group id="PromptPack.TreeScopeGroup"
+           class="dev.promptpack.TreeScopeGroupAction"
+           popup="true">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+    </group>
+
+    <action id="PromptPack.TreeScope.Project"   class="dev.promptpack.TreeScopeProjectToggleAction">
+      <add-to-group group-id="PromptPack.TreeScopeGroup" anchor="last"/>
+    </action>
+    <action id="PromptPack.TreeScope.Selection" class="dev.promptpack.TreeScopeSelectionToggleAction">
+      <add-to-group group-id="PromptPack.TreeScopeGroup" anchor="last"/>
+    </action>
+    <action id="PromptPack.TreeScope.None"      class="dev.promptpack.TreeScopeNoneToggleAction">
+      <add-to-group group-id="PromptPack.TreeScopeGroup" anchor="last"/>
+    </action>
+
+    <action id="PromptPack.TreeScope.Cycle" class="dev.promptpack.CycleTreeScopeAction">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt T"/>
+    </action>
+
+    <action id="PromptPack.EditBlacklist" class="dev.promptpack.EditBlacklistAction">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+    </action>
+
+    <action id="PromptPack.DiffWithDefaultBranch"
+            class="dev.promptpack.DiffWithDefaultBranchAction">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt D"/>
+    </action>
+  </actions>
+</idea-plugin>
