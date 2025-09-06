@@ -9,25 +9,32 @@
 
     <applicationConfigurable
             id="dev.promptpack"
-            displayName="%configurable.name%"
+            parentId="tools"
+            key="configurable.name"
+            bundle="messages.PromptPackBundle"
             instance="dev.promptpack.PromptPackConfigurable"/>
   </extensions>
 
   <actions>
-    <action id="PromptPack.CopySelectedItemsContents"
-            class="dev.promptpack.CopySelectedItemsContentsAction">
-      <add-to-group group-id="ToolsMenu" anchor="last"/>
-      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
-      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt C"/>
-    </action>
-
-    <group id="PromptPack.TreeScopeGroup"
-           class="dev.promptpack.TreeScopeGroupAction"
-           popup="true">
+    <!-- ВЕРХНЕУРОВНЕВАЯ ГРУППА МЕНЮ -->
+    <group id="PromptPack.Menu" text="PromptPack" popup="true">
       <add-to-group group-id="ToolsMenu" anchor="last"/>
       <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
     </group>
 
+    <!-- Копирование контента -->
+    <action id="PromptPack.CopySelectedItemsContents"
+            class="dev.promptpack.CopySelectedItemsContentsAction">
+      <add-to-group group-id="PromptPack.Menu" anchor="first"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt C"/>
+    </action>
+
+    <!-- Подменю режима дерева -->
+    <group id="PromptPack.TreeScopeGroup"
+           class="dev.promptpack.TreeScopeGroupAction"
+           popup="true">
+      <add-to-group group-id="PromptPack.Menu" anchor="last"/>
+    </group>
     <action id="PromptPack.TreeScope.Project"   class="dev.promptpack.TreeScopeProjectToggleAction">
       <add-to-group group-id="PromptPack.TreeScopeGroup" anchor="last"/>
     </action>
@@ -38,21 +45,21 @@
       <add-to-group group-id="PromptPack.TreeScopeGroup" anchor="last"/>
     </action>
 
+    <!-- Быстрое переключение -->
     <action id="PromptPack.TreeScope.Cycle" class="dev.promptpack.CycleTreeScopeAction">
-      <add-to-group group-id="ToolsMenu" anchor="last"/>
-      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+      <add-to-group group-id="PromptPack.Menu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt T"/>
     </action>
 
+    <!-- Чёрный список -->
     <action id="PromptPack.EditBlacklist" class="dev.promptpack.EditBlacklistAction">
-      <add-to-group group-id="ToolsMenu" anchor="last"/>
-      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+      <add-to-group group-id="PromptPack.Menu" anchor="last"/>
     </action>
 
+    <!-- Diff -->
     <action id="PromptPack.DiffWithDefaultBranch"
             class="dev.promptpack.DiffWithDefaultBranchAction">
-      <add-to-group group-id="ToolsMenu" anchor="last"/>
-      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+      <add-to-group group-id="PromptPack.Menu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt D"/>
     </action>
   </actions>

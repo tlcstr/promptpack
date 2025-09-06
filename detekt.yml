@@ -1,0 +1,66 @@
+config:
+  validation: true
+  warningsAsErrors: false
+
+build:
+  maxIssues: 0
+
+console-reports:
+  active: true
+
+style:
+  excludes: ['**/build/**', '**/.gradle/**', '**/out/**', '**/.idea/**', '**/resources/**', '**/src/**/resources/**']
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: false
+  MaxLineLength:
+    active: true
+    maxLineLength: 160
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: true
+  ReturnCount:
+    active: true
+    max: 6
+  UnusedParameter:
+    active: false
+
+complexity:
+  excludes: ['**/build/**', '**/.gradle/**', '**/out/**']
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 35
+  LongMethod:
+    active: true
+    threshold: 90
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 10
+    ignoreDefaultParameters: true
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 30
+    thresholdInClasses: 25
+    ignoreOverridden: true
+
+potential-bugs:
+  excludes: ['**/build/**', '**/.gradle/**', '**/out/**']
+  EqualsWithHashCodeExist:
+    active: true
+  AvoidReferentialEquality:
+    active: true
+
+naming:
+  excludes: ['**/build/**', '**/.gradle/**', '**/out/**', '**/src/**/test/**']
+  FunctionNaming:
+    active: true
+  PackageNaming:
+    active: true
+    packagePattern: '^[a-z]+(\.[a-z][A-Za-z0-9]*)*$'
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: '[A-Z][_A-Z0-9]*'
+    propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
+    privatePropertyPattern: '_?[A-Za-z][_A-Za-z0-9]*'

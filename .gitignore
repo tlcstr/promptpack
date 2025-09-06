@@ -8,3 +8,5 @@ out/
 ./.gitignore
 
 "./gradlew" "./.gitignore"
+
+.kotlin
