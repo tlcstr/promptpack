@@ -1,4 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 plugins {
@@ -15,9 +16,21 @@ repositories {
 
 dependencies {
   intellijPlatform {
-    // Локальная IDE для runIde/сборки
+    // Local IDE for development/runIde
     local("/Applications/WebStorm.app/Contents")
+
+    // IntelliJ Platform Test Framework (for BasePlatformTestCase, etc.)
+    testFramework(TestFrameworkType.Platform)
   }
+
+  // Test dependencies (JUnit 4)
+  testImplementation("junit:junit:4.13.2")
+  // Use kotlin-test with JUnit4 to avoid JUnit5 engine clashes
+  testImplementation(kotlin("test-junit"))
+
+  // Workarounds for 2.x: missing runtime artifacts sometimes needed by the test framework
+  testRuntimeOnly("org.opentest4j:opentest4j:1.3.0")
+  testRuntimeOnly("junit:junit:4.13.2")
 }
 
 kotlin {
@@ -40,11 +53,12 @@ intellijPlatform {
     }
   }
 
+  // Do not generate searchable options
   buildSearchableOptions = false
 
+  // Verify the plugin against WebStorm 242.* releases
   pluginVerification {
     ides {
-      // Верифицируемся на релизных WebStorm 242.*
       select {
         types = listOf(IntelliJPlatformType.WebStorm)
         channels = listOf(ProductRelease.Channel.RELEASE)
@@ -70,4 +84,11 @@ detekt {
 
 tasks.named("check") {
   dependsOn("ktlintCheck", "detekt")
+}
+
+tasks.test {
+  // Force the JUnit4 runner (BasePlatformTestCase is JUnit3-style but compatible)
+  useJUnit()
+  systemProperty("java.awt.headless", "true")
+  maxParallelForks = 1
 }
