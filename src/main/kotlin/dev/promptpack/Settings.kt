@@ -12,6 +12,7 @@ enum class TreeScope { PROJECT, SELECTION, NONE }
 enum class TestFilesMode { INCLUDE, EXCLUDE }
 
 object PromptPackDefaults {
+  // Directories to ignore at any depth (names, case-insensitive)
   val IGNORED_DIRS: List<String> =
     listOf(
       ".git",
@@ -24,17 +25,18 @@ object PromptPackDefaults {
       ".next",
       ".output",
       ".yarn",
+      ".turbo",
       "target",
       "coverage",
       "venv",
       ".venv",
       ".intellijPlatform",
       ".promptpack",
-      ".turbo",
       "android",
       "ios",
     )
 
+  // Extensions to ignore (without dot), case-insensitive
   val IGNORED_EXTS: List<String> =
     listOf(
       "png",
@@ -109,9 +111,43 @@ object PromptPackDefaults {
       "__tests__",
       "__mocks__",
     )
+
+  // --- NEW: Module detection / Public API defaults ---
+
+  /** File names (with wildcards) that mark a directory as a module by manifest (checked at the directory root). */
+  val MODULE_MANIFESTS: List<String> =
+    listOf(
+      "package.json",
+      "pyproject.toml",
+      "go.mod",
+      "Cargo.toml",
+      "pom.xml",
+      "build.gradle",
+      "build.gradle.kts",
+      "composer.json",
+      "Gemfile",
+      "*.csproj",
+    )
+
+  /** Project-relative glob patterns that mark a directory as a module by path. */
+  val MODULE_PATH_PATTERNS: List<String> =
+    listOf(
+      "packages/*",
+      "libs/*",
+      "modules/*",
+    )
+
+  /** Public folder names that expose module API (matched case-insensitive). */
+  val PUBLIC_FOLDER_NAMES: List<String> =
+    listOf(
+      "public",
+      "public-api",
+      "publicApi",
+    )
 }
 
 data class PromptPackState(
+  // existing settings
   var treeScope: TreeScope = TreeScope.PROJECT,
   var ignoredDirs: MutableSet<String> = PromptPackDefaults.IGNORED_DIRS.toMutableSet(),
   var ignoredExts: MutableSet<String> = PromptPackDefaults.IGNORED_EXTS.toMutableSet(),
@@ -122,18 +158,32 @@ data class PromptPackState(
   var testDirs: MutableSet<String> = PromptPackDefaults.TEST_DIRS.toMutableSet(),
   var defaultDiffRef: String = "",
   var maxClipboardKb: Int = 800,
+  // NEW: Module detection
+  var moduleDetectByManifest: Boolean = true,
+  var moduleDetectByPathPatterns: Boolean = true,
+  var moduleRequirePublicFolder: Boolean = true,
+  var moduleManifestNames: MutableSet<String> = PromptPackDefaults.MODULE_MANIFESTS.toMutableSet(),
+  var modulePathPatterns: MutableSet<String> = PromptPackDefaults.MODULE_PATH_PATTERNS.toMutableSet(),
+  // NEW: Public API (Copy Contents)
+  var publicEnabled: Boolean = true,
+  var publicFolderNames: MutableSet<String> = PromptPackDefaults.PUBLIC_FOLDER_NAMES.toMutableSet(),
+  var publicSkipDuplicatesInMain: Boolean = false,
+  var publicMaxPerModule: Int = 200,
+  var publicMaxTotal: Int = 500,
 )
 
 @Service(Service.Level.APP)
 @State(
   name = "PromptPackState",
-  storages = [Storage("promptpack.xml")],
+  storages = [
+    Storage("promptpack.xml"),
+  ],
   category = SettingsCategory.PLUGINS,
 )
 class PromptPackSettingsService : PersistentStateComponent<PromptPackState> {
   private var state = PromptPackState()
 
-  override fun getState() = state
+  override fun getState(): PromptPackState = state
 
   override fun loadState(s: PromptPackState) {
     state = s
@@ -141,8 +191,8 @@ class PromptPackSettingsService : PersistentStateComponent<PromptPackState> {
 
   companion object {
     fun getInstance(): PromptPackSettingsService =
-      com.intellij.openapi.application.ApplicationManager.getApplication().getService(
-        PromptPackSettingsService::class.java,
-      )
+      com.intellij.openapi.application.ApplicationManager
+        .getApplication()
+        .getService(PromptPackSettingsService::class.java)
   }
 }
