@@ -59,12 +59,15 @@ class DiffWithDefaultBranchAction :
     }
 
     val state = PromptPackSettingsService.getInstance().state
-    val ignoredDirs = state.ignoredDirs.map { it.lowercase(Locale.ROOT) }.toSet()
+    val ignoredDirsBase = state.ignoredDirs.map { it.lowercase(Locale.ROOT) }.toMutableSet()
     val ignoredExts = state.ignoredExts.map { it.lowercase(Locale.ROOT) }.toSet()
     val ignoredFiles = state.ignoredFiles.map { it.lowercase(Locale.ROOT) }.toSet()
+    val testDirs = state.testDirs.map { it.lowercase(Locale.ROOT) }.toSet()
+    val effectiveIgnoredDirs =
+      if (state.testFilesMode == TestFilesMode.EXCLUDE) ignoredDirsBase.apply { addAll(testDirs) } else ignoredDirsBase
 
     val files = LinkedHashSet<VirtualFile>()
-    selection.forEach { VfsFilters.collectFiles(it, files, ignoredDirs, ignoredExts, ignoredFiles) }
+    selection.forEach { VfsFilters.collectFiles(it, files, effectiveIgnoredDirs, ignoredExts, ignoredFiles) }
 
     if (files.isEmpty()) {
       notify(project, PromptPackBundle.message("notify.noTextFiles"), NotificationType.WARNING)
@@ -81,7 +84,7 @@ class DiffWithDefaultBranchAction :
           FileTreeUtil.TreeInput(
             scope = state.treeScope,
             selection = selection,
-            ignoredDirs = ignoredDirs,
+            ignoredDirs = effectiveIgnoredDirs,
             ignoredExts = ignoredExts,
           ),
         )

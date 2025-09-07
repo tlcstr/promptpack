@@ -10,29 +10,29 @@ LLM helper for JetBrains IDEs: copy selected files/folders as clean Markdown (wi
 
 * **Copy Contents of Selected Items**
 
-    * Each file becomes `relative/path.ext:` followed by a fenced code block (` ```lang`).
-    * Language is guessed from extension; unsaved editor changes are included.
-    * Optional **file tree** (whole project / selection).
-    * Skips binaries, ignored folders/extensions, and common lock files (e.g. `pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`, `Cargo.lock`, `poetry.lock`).
+  * Each file becomes `relative/path.ext:` followed by a fenced code block (` ```lang`).
+  * Language is guessed from extension; unsaved editor changes are included.
+  * Optional **file tree** (whole project / selection).
+  * Skips binaries, ignored folders/extensions, and common lock files (e.g. `pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`, `Cargo.lock`, `poetry.lock`).
 
 * **Diff with Default Branch**
 
-    * One combined `git diff` vs detected default ref (`origin/HEAD` → `origin/<main|master>`), rendered as a Markdown \`\`\`diff block.
+  * One combined `git diff` vs detected default ref (`origin/HEAD` → `origin/<main|master>`), rendered as a Markdown \`\`\`diff block.
 
 * **Auto-export for large outputs**
 
-    * If the content exceeds the limit, it’s saved to:
+  * If the content exceeds the limit, it’s saved to:
 
-      ```
-      .promptpack/exports/20240101-123456/
-        index.md
-        content.md | part-01.md, part-02.md, ...
-      ```
-    * `index.md` links all parts and (optionally) includes the file tree.
+    ```
+    .promptpack/exports/20240101-123456/
+      index.md
+      content.md | part-01.md, part-02.md, ...
+    ```
+  * `index.md` links all parts and (optionally) includes the file tree.
 
 * **Robust fenced blocks**
 
-    * Fence length adapts to backticks inside content (no broken Markdown).
+  * Fence length adapts to backticks inside content (no broken Markdown).
 
 ---
 
@@ -88,6 +88,7 @@ Artifacts: `build/distributions/`.
 
 * **File tree scope:** Project / Selection / Off
 * **Filters:** ignored folders & extensions (comma-separated)
+* **Test folders:** include or exclude test folders; specify folder names (matched by directory name at any depth, case-insensitive, e.g. `__tests__`, `__mocks__`)
 * **Diff:** default ref (leave empty for auto-detect)
 * **Clipboard limit:** max size before auto-export (KB)
 

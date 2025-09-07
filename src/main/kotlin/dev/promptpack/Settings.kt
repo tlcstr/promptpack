@@ -8,6 +8,9 @@ import com.intellij.openapi.components.Storage
 
 enum class TreeScope { PROJECT, SELECTION, NONE }
 
+/** How to treat test folders. */
+enum class TestFilesMode { INCLUDE, EXCLUDE }
+
 object PromptPackDefaults {
   val IGNORED_DIRS: List<String> =
     listOf(
@@ -28,7 +31,10 @@ object PromptPackDefaults {
       ".intellijPlatform",
       ".promptpack",
       ".turbo",
+      "android",
+      "ios",
     )
+
   val IGNORED_EXTS: List<String> =
     listOf(
       "png",
@@ -79,7 +85,7 @@ object PromptPackDefaults {
       "fig",
     )
 
-  /** NEW: точные имена файлов, которые игнорируем (lock-файлы и т.п.). */
+  /** Exact file names to ignore (lock files etc.). */
   val IGNORED_FILES: List<String> =
     listOf(
       "package-lock.json",
@@ -96,14 +102,24 @@ object PromptPackDefaults {
       "Gemfile.lock",
       ".DS_Store",
     )
+
+  /** Default test folder names (matched by directory name at any depth, case-insensitive). */
+  val TEST_DIRS: List<String> =
+    listOf(
+      "__tests__",
+      "__mocks__",
+    )
 }
 
 data class PromptPackState(
   var treeScope: TreeScope = TreeScope.PROJECT,
   var ignoredDirs: MutableSet<String> = PromptPackDefaults.IGNORED_DIRS.toMutableSet(),
   var ignoredExts: MutableSet<String> = PromptPackDefaults.IGNORED_EXTS.toMutableSet(),
-  /** NEW: имена файлов (без путей), сравнение по lower-case. */
+  /** Exact file names (no paths), comparison is case-insensitive via lower-case. */
   var ignoredFiles: MutableSet<String> = PromptPackDefaults.IGNORED_FILES.toMutableSet(),
+  /** NEW: test-folders handling. */
+  var testFilesMode: TestFilesMode = TestFilesMode.EXCLUDE,
+  var testDirs: MutableSet<String> = PromptPackDefaults.TEST_DIRS.toMutableSet(),
   var defaultDiffRef: String = "",
   var maxClipboardKb: Int = 800,
 )

@@ -20,6 +20,10 @@ class PromptPackConfigurable :
   private lateinit var ignoredExtsField: JBTextField
   private lateinit var ignoredFilesField: JBTextField
 
+  // NEW: tests handling
+  private var selectedTestsMode: TestFilesMode = svc.state.testFilesMode
+  private lateinit var testDirsField: JBTextField
+
   override fun createPanel() =
     panel {
       // File tree scope (radio buttons)
@@ -30,12 +34,10 @@ class PromptPackConfigurable :
             val rbSelection = radioButton(PromptPackBundle.message("ui.radio.selection"))
             val rbNone = radioButton(PromptPackBundle.message("ui.radio.none"))
 
-            // Initialize selection
             rbProject.component.isSelected = (selectedScope == TreeScope.PROJECT)
             rbSelection.component.isSelected = (selectedScope == TreeScope.SELECTION)
             rbNone.component.isSelected = (selectedScope == TreeScope.NONE)
 
-            // Update local state on change
             rbProject.component.addActionListener { selectedScope = TreeScope.PROJECT }
             rbSelection.component.addActionListener { selectedScope = TreeScope.SELECTION }
             rbNone.component.addActionListener { selectedScope = TreeScope.NONE }
@@ -68,6 +70,30 @@ class PromptPackConfigurable :
               .component
         }
       }
+
+      // NEW: test folders handling
+      group(PromptPackBundle.message("ui.group.tests")) {
+        buttonsGroup(PromptPackBundle.message("ui.tests.mode")) {
+          row {
+            val rbInclude = radioButton(PromptPackBundle.message("ui.tests.include"))
+            val rbExclude = radioButton(PromptPackBundle.message("ui.tests.exclude"))
+
+            rbInclude.component.isSelected = (selectedTestsMode == TestFilesMode.INCLUDE)
+            rbExclude.component.isSelected = (selectedTestsMode == TestFilesMode.EXCLUDE)
+
+            rbInclude.component.addActionListener { selectedTestsMode = TestFilesMode.INCLUDE }
+            rbExclude.component.addActionListener { selectedTestsMode = TestFilesMode.EXCLUDE }
+          }
+        }
+        row(PromptPackBundle.message("ui.tests.folders")) {
+          testDirsField =
+            textField()
+              .align(AlignX.FILL)
+              .resizableColumn()
+              .comment(PromptPackBundle.message("ui.tests.folders.hint"))
+              .component
+        }
+      }
     }
 
   override fun getPreferredFocusedComponent(): JComponent? = null
@@ -77,10 +103,14 @@ class PromptPackConfigurable :
     val dirsSetNow = ignoredDirsField.text.normalizeCsv().toMutableSet()
     val extsSetNow = ignoredExtsField.text.normalizeCsv(lowercase = true, trimDots = true).toMutableSet()
     val filesSetNow = ignoredFilesField.text.normalizeCsv(lowercase = true).toMutableSet()
+    val testDirsNow = testDirsField.text.normalizeCsv(lowercase = true).toMutableSet()
+
     return selectedScope != st.treeScope ||
       dirsSetNow != st.ignoredDirs ||
       extsSetNow != st.ignoredExts ||
-      filesSetNow != st.ignoredFiles
+      filesSetNow != st.ignoredFiles ||
+      selectedTestsMode != st.testFilesMode ||
+      testDirsNow != st.testDirs
   }
 
   override fun apply() {
@@ -89,6 +119,8 @@ class PromptPackConfigurable :
     st.ignoredDirs = ignoredDirsField.text.normalizeCsv().toMutableSet()
     st.ignoredExts = ignoredExtsField.text.normalizeCsv(lowercase = true, trimDots = true).toMutableSet()
     st.ignoredFiles = ignoredFilesField.text.normalizeCsv(lowercase = true).toMutableSet()
+    st.testFilesMode = selectedTestsMode
+    st.testDirs = testDirsField.text.normalizeCsv(lowercase = true).toMutableSet()
   }
 
   override fun reset() {
@@ -97,6 +129,9 @@ class PromptPackConfigurable :
     ignoredDirsField.text = st.ignoredDirs.joinToString(",")
     ignoredExtsField.text = st.ignoredExts.joinToString(",")
     ignoredFilesField.text = st.ignoredFiles.joinToString(",")
+
+    selectedTestsMode = st.testFilesMode
+    testDirsField.text = st.testDirs.joinToString(",")
   }
 
   private fun String.normalizeCsv(
