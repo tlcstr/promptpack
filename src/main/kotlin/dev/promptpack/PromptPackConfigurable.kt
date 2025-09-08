@@ -36,6 +36,7 @@ class PromptPackConfigurable :
   private lateinit var requirePublicCb: JBCheckBox
 
   // Public API
+  private lateinit var publicEnabledCb: JBCheckBox
   private lateinit var publicNamesField: JBTextField
   private lateinit var skipDupMainCb: JBCheckBox
   private lateinit var maxPerModuleField: JBTextField
@@ -121,6 +122,10 @@ class PromptPackConfigurable :
 
       // Public API (NEW)
       group(PromptPackBundle.message("ui.group.publicApi")) {
+        row {
+          // <— NEW: master toggle for Public API section
+          publicEnabledCb = checkBox(PromptPackBundle.message("ui.public.enabled")).component
+        }
         row(PromptPackBundle.message("ui.public.names")) {
           publicNamesField = textField().align(AlignX.FILL).resizableColumn().component
         }
@@ -168,6 +173,7 @@ class PromptPackConfigurable :
       pathPatternsField.text.normalizeCsv(lowercase = true).toMutableSet() != st.modulePathPatterns ||
       requirePublicCb.isSelected != st.moduleRequirePublicFolder ||
       // public
+      publicEnabledCb.isSelected != st.publicEnabled || // <— NEW
       publicNamesField.text.normalizeCsv(lowercase = true).toMutableSet() != st.publicFolderNames ||
       skipDupMainCb.isSelected != st.publicSkipDuplicatesInMain ||
       maxPerModuleField.text.trim().toIntOrNull() != st.publicMaxPerModule ||
@@ -204,6 +210,8 @@ class PromptPackConfigurable :
     st.modulePathPatterns = pathPatternsField.text.normalizeCsv(lowercase = true).toMutableSet()
     st.moduleRequirePublicFolder = requirePublicCb.isSelected
 
+    // Public API
+    st.publicEnabled = publicEnabledCb.isSelected         // <— NEW
     st.publicFolderNames = publicNamesField.text.normalizeCsv(lowercase = true).toMutableSet()
     st.publicSkipDuplicatesInMain = skipDupMainCb.isSelected
     st.publicMaxPerModule = maxPerModuleField.text.trim().toIntOrNull() ?: st.publicMaxPerModule
@@ -226,6 +234,7 @@ class PromptPackConfigurable :
     pathPatternsField.text = st.modulePathPatterns.joinToString(",")
     requirePublicCb.isSelected = st.moduleRequirePublicFolder
 
+    publicEnabledCb.isSelected = st.publicEnabled         // <— NEW
     publicNamesField.text = st.publicFolderNames.joinToString(",")
     skipDupMainCb.isSelected = st.publicSkipDuplicatesInMain
     maxPerModuleField.text = st.publicMaxPerModule.toString()

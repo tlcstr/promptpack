@@ -62,5 +62,15 @@
       <add-to-group group-id="PromptPack.Menu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt D"/>
     </action>
+
+    <!-- NEW: Toggle Public API section -->
+    <action id="PromptPack.TogglePublicApi"
+            class="dev.promptpack.TogglePublicApiAction"
+            descriptionKey="action.togglePublic.description"
+            textKey="action.togglePublic.text">
+      <add-to-group group-id="PromptPack.Menu" anchor="last"/>
+      <!-- macOS: Shift-Option-Command-P -->
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt P"/>
+    </action>
   </actions>
 </idea-plugin>
