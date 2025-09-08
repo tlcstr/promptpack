@@ -96,7 +96,91 @@ Artifacts: `build/distributions/`.
 
 ---
 
+## Public API (Copy Contents) — how it works
+
+The Public API feature augments **Copy Contents of Selected Items** by auto-collecting text files that represent the “public surface” of your modules (e.g., `public/` docs, samples, API files) and emitting them as a separate section **before** the rest of the selection.
+
+### 1) Toggle & configuration
+
+* Master toggle: **Preferences → PromptPack → Public API (Copy Contents) → “Include Public API section”**.
+* Key options:
+  * **Public folder names (CSV):** names matched case-insensitively (default: `public`, `public-api`, `publicApi`).
+  * **Skip duplicates in main content:** if a file appears in Public API, it’s removed from the “Selected Files” section.
+  * **Max public files per module / total:** caps to keep output manageable.
+* Related (Module Detection):
+  * **Detect by manifest:** a module root is any directory containing a known manifest (CSV, e.g., `package.json`, `pyproject.toml`, `go.mod`, `build.gradle.kts`, `Cargo.toml`, `*.csproj`, etc.).
+  * **Detect by path patterns:** project-relative glob patterns (CSV, e.g., `packages/*`, `libs/*`, `modules/*`).
+  * **Require public folder:** only treat a directory as a module if it (or its descendants) contains a matching public folder.
+
+### 2) What is considered a module?
+
+Given your **current Project View selection**, PromptPack:
+1. Walks **down** into selected directories and **up** their ancestor chains.
+2. Marks directories as **modules** if they match **any** enabled rule:
+  * has a supported **manifest**, or
+  * its project-relative path matches a configured **pattern**.
+3. Optionally requires the module to contain a **public folder** (configurable).
+
+> Modules are sorted by project-relative path for deterministic output.
+
+### 3) What is collected into Public API?
+
+For each detected module, PromptPack finds **public folders** (matching configured names, case-insensitively), then recursively collects **text files**:
+* **Included:** all non-binary files not excluded by your filters.
+* **Excluded:**
+  * files with ignored extensions or exact ignored file names (lock files, binaries, etc.),
+  * directories with ignored names (e.g., `node_modules`, `build`, etc.),
+  * **test folders** when “Exclude test folders” is selected (by directory name, at any depth).
+
+Per-module and total **limits** are applied:
+* If a module exceeds **Max public files per module**, it’s trimmed and you get a notification.
+* If combined Public API exceeds **Max public files total**, the list is trimmed globally (notification shown).
+
+All Public API files are **de-duplicated by path** and **sorted** by project-relative path.
+
+### 4) Output structure
+
+When enabled and at least one public file is found, the final Markdown looks like:
+
+```
+# File tree (project/selection)…
+```text
+…tree…
+```
+
+# Public API
+./packages/foo/public/index.ts:
+```ts
+export type Foo = …
+```
+
+./packages/bar/public/README.md:
+```markdown
+# Bar API
+…
+```
+
+# Selected Files
+./some/other/selected/file.kt:
+```kotlin
+…
+```
+
+Notes:
+* If “Skip duplicates in main content” is ON, any file already listed under **Public API** is removed from **Selected Files**.
+* Unsaved editor changes are included.
+* Small results go to the clipboard; large results are exported to `.promptpack/exports/<timestamp>/` and `index.md` is opened in the IDE.
+
+### 5) Why this design?
+
+* **Deterministic**: stable ordering and explicit limits make output reproducible.
+* **Safe & fast**: runs on background threads, reads via `ReadAction`, and respects your ignore lists.
+* **Minimal magic**: simple rules—manifests, path patterns, and explicit public folder names.
+
+---
+
 ## Requirements
 
 * Git available in `PATH` (for diff).
 * JetBrains IDE 2024.2 (build 242.\*).
+
