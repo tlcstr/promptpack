@@ -72,5 +72,14 @@
       <!-- macOS: Shift-Option-Command-P -->
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt P"/>
     </action>
+
+    <!-- NEW: Zip selected files -->
+    <action id="PromptPack.ZipSelected"
+            class="dev.promptpack.ZipSelectedItemsAction"
+            text="PromptPack: Zip Selected Files"
+            description="Create a ZIP archive from the current selection (respects Public API mode)">
+      <add-to-group group-id="PromptPack.Menu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt Z"/>
+    </action>
   </actions>
 </idea-plugin>
