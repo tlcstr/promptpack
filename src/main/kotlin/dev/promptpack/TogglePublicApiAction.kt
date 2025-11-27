@@ -11,16 +11,17 @@ import com.intellij.openapi.actionSystem.ToggleAction
  * - Runs on BGT, never blocks the EDT.
  * - Reflects the current state with a checkmark in the menu.
  */
-class TogglePublicApiAction :
-  ToggleAction(PromptPackBundle.message("action.togglePublic.text")) {
-
+class TogglePublicApiAction : ToggleAction(PromptPackBundle.message("action.togglePublic.text")) {
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
   private val svc get() = PromptPackSettingsService.getInstance()
 
   override fun isSelected(e: AnActionEvent): Boolean = svc.state.publicEnabled
 
-  override fun setSelected(e: AnActionEvent, state: Boolean) {
+  override fun setSelected(
+    e: AnActionEvent,
+    state: Boolean,
+  ) {
     svc.state.publicEnabled = state
     e.project?.let { project ->
       val key = if (state) "notify.public.enabled" else "notify.public.disabled"

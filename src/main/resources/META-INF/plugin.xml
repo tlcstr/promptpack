@@ -28,6 +28,20 @@
       <add-to-group group-id="PromptPack.Menu" anchor="first"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt C"/>
     </action>
+    <action id="PromptPack.CopyOpenTabsContents"
+            class="dev.promptpack.CopyOpenTabsContentsAction"
+            textKey="action.copyTabContents.text"
+            descriptionKey="action.copyTabContents.description">
+      <add-to-group group-id="PromptPack.Menu" anchor="first"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt O"/>
+    </action>
+    <action id="PromptPack.CopyChangedFilesContents"
+            class="dev.promptpack.CopyChangedFilesContentsAction"
+            textKey="action.copyChangedContents.text"
+            descriptionKey="action.copyChangedContents.description">
+      <add-to-group group-id="PromptPack.Menu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt B"/>
+    </action>
 
     <!-- Подменю режима дерева -->
     <group id="PromptPack.TreeScopeGroup"

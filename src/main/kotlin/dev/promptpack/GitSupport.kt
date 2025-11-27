@@ -60,6 +60,72 @@ object GitSupport {
     return "origin/main"
   }
 
+  data class ChangedPathsResult(
+    val paths: List<String>,
+    val exitCode: Int,
+    val stderr: String,
+  )
+
+  /**
+   * Diff against the default ref (renames detected).
+   */
+  fun listChangedPaths(
+    rootDir: File,
+    defaultRef: String,
+    relPathsFilter: List<String>? = null,
+  ): ChangedPathsResult {
+    val params = mutableListOf("diff", "--name-only", "-M", defaultRef, "--")
+    if (relPathsFilter != null && relPathsFilter.isNotEmpty()) {
+      params += relPathsFilter
+    }
+    val out = runGit(rootDir, params)
+    val paths =
+      out.stdout
+        .lineSequence()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .toList()
+    return ChangedPathsResult(paths = paths, exitCode = out.exitCode, stderr = out.stderr)
+  }
+
+  /**
+   * Collect changed files in working tree (staged + unstaged).
+   */
+  fun listWorkingTreeChanges(
+    rootDir: File,
+    relPathsFilter: List<String>? = null,
+  ): ChangedPathsResult {
+    val paths = LinkedHashSet<String>()
+
+    fun buildParams(base: List<String>): List<String> {
+      val params = mutableListOf<String>()
+      params.addAll(base)
+      if (relPathsFilter != null && relPathsFilter.isNotEmpty()) {
+        params += "--"
+        params += relPathsFilter
+      }
+      return params
+    }
+
+    fun runAndCollect(base: List<String>): ChangedPathsResult? {
+      val out = runGit(rootDir, buildParams(base))
+      if (out.exitCode != 0) return ChangedPathsResult(emptyList(), out.exitCode, out.stderr)
+      out.stdout
+        .lineSequence()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .forEach { paths += it }
+      return null
+    }
+
+    // Unstaged changes
+    runAndCollect(listOf("diff", "--name-only"))?.let { return it }
+    // Staged changes
+    runAndCollect(listOf("diff", "--name-only", "--cached"))?.let { return it }
+
+    return ChangedPathsResult(paths = paths.toList(), exitCode = 0, stderr = "")
+  }
+
   fun runGit(
     workDir: File,
     params: List<String>,

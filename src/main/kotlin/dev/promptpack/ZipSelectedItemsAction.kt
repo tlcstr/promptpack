@@ -2,7 +2,10 @@ package dev.promptpack
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.actionSystem.ActionUpdateThread
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -19,7 +22,8 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.LinkedHashSet
+import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -32,16 +36,15 @@ import java.util.zip.ZipOutputStream
  *  - module discovery via [ModuleDetector]
  *  - public API selection via [PublicApiCollector]
  *
- * Heavy work is done in a background task; VFS/doc reads happen under ReadAction. :contentReference[oaicite:0]{index=0}
+ * Heavy work is done in a background task; VFS/doc reads happen under ReadAction.
  * If Public API mode is on, only files from modules' public folders are included for those modules.
  */
 class ZipSelectedItemsAction : AnAction() {
-
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
   override fun update(e: AnActionEvent) {
     val hasProject = e.project != null
-    val hasSelection = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)?.isNotEmpty() == true // uses standard key :contentReference[oaicite:1]{index=1}
+    val hasSelection = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)?.isNotEmpty() == true
     e.presentation.isEnabledAndVisible = hasProject && hasSelection
   }
 
@@ -53,11 +56,15 @@ class ZipSelectedItemsAction : AnAction() {
         override fun run(indicator: ProgressIndicator) {
           runZip(project, selection, indicator)
         }
-      }
+      },
     )
   }
 
-  private fun runZip(project: Project, selection: Array<VirtualFile>, indicator: ProgressIndicator) {
+  private fun runZip(
+    project: Project,
+    selection: Array<VirtualFile>,
+    indicator: ProgressIndicator,
+  ) {
     indicator.text = "Collecting files…"
 
     val st = PromptPackSettingsService.getInstance().state
@@ -94,15 +101,16 @@ class ZipSelectedItemsAction : AnAction() {
         ModuleDetector.detectModules(
           project = project,
           selection = selection,
-          cfg = ModuleDetector.Config(
-            detectByManifest = st.moduleDetectByManifest,
-            manifestNames = st.moduleManifestNames.lc(),
-            detectByPathPatterns = st.moduleDetectByPathPatterns,
-            pathPatterns = st.modulePathPatterns.lc(),
-            requirePublicFolder = st.moduleRequirePublicFolder,
-            publicFolderNames = st.publicFolderNames.lc(),
-            ignoredDirs = effectiveIgnoredDirs,
-          ),
+          cfg =
+            ModuleDetector.Config(
+              detectByManifest = st.moduleDetectByManifest,
+              manifestNames = st.moduleManifestNames.lc(),
+              detectByPathPatterns = st.moduleDetectByPathPatterns,
+              pathPatterns = st.modulePathPatterns.lc(),
+              requirePublicFolder = st.moduleRequirePublicFolder,
+              publicFolderNames = st.publicFolderNames.lc(),
+              ignoredDirs = effectiveIgnoredDirs,
+            ),
         )
 
       val result =
@@ -137,10 +145,11 @@ class ZipSelectedItemsAction : AnAction() {
         mainFiles.toList()
       }
 
-    val allFiles = LinkedHashSet<VirtualFile>().apply {
-      addAll(mainFilesFiltered)
-      addAll(publicFiles)
-    }
+    val allFiles =
+      LinkedHashSet<VirtualFile>().apply {
+        addAll(mainFilesFiltered)
+        addAll(publicFiles)
+      }
 
     if (allFiles.isEmpty()) {
       notify(project, "PromptPack: nothing to zip (no matching files).", NotificationType.WARNING)
@@ -158,7 +167,11 @@ class ZipSelectedItemsAction : AnAction() {
     notify(project, "ZIP written: $zipPath", NotificationType.INFORMATION)
 
     if (trimmedPerModuleCount > 0) {
-      notify(project, "Public API: limited per-module (${trimmedPerModuleCount} modules trimmed).", NotificationType.INFORMATION)
+      notify(
+        project,
+        "Public API: limited per-module ($trimmedPerModuleCount modules trimmed).",
+        NotificationType.INFORMATION,
+      )
     }
     if (trimmedTotal) {
       notify(project, "Public API: reached total cap (${st.publicMaxTotal}).", NotificationType.INFORMATION)
@@ -183,8 +196,8 @@ class ZipSelectedItemsAction : AnAction() {
     val root = project.basePath?.let { LocalFileSystem.getInstance().findFileByPath(it) }
     ZipOutputStream(
       BufferedOutputStream(
-        Files.newOutputStream(zipPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
-      )
+        Files.newOutputStream(zipPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING),
+      ),
     ).use { zos ->
       files.forEachIndexed { idx, vf ->
         indicator.fraction = (idx + 1).toDouble() / files.size
@@ -200,7 +213,10 @@ class ZipSelectedItemsAction : AnAction() {
           ApplicationManager.getApplication().runReadAction(
             Computable {
               // If a document is open, prefer its text (including unsaved edits).
-              val doc = com.intellij.openapi.fileEditor.FileDocumentManager.getInstance().getDocument(vf)
+              val doc =
+                com.intellij.openapi.fileEditor.FileDocumentManager
+                  .getInstance()
+                  .getDocument(vf)
               if (doc != null) doc.text.toByteArray(Charsets.UTF_8) else vf.contentsToByteArray()
             },
           )
@@ -212,7 +228,11 @@ class ZipSelectedItemsAction : AnAction() {
     }
   }
 
-  private fun notify(project: Project, msg: String, type: NotificationType) {
+  private fun notify(
+    project: Project,
+    msg: String,
+    type: NotificationType,
+  ) {
     NotificationGroupManager
       .getInstance()
       .getNotificationGroup("PromptPack")

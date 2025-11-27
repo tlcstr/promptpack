@@ -77,7 +77,10 @@ object PublicApiCollector {
     )
   }
 
-  private fun relPathOrAbs(vf: VirtualFile, root: VirtualFile?): String {
+  private fun relPathOrAbs(
+    vf: VirtualFile,
+    root: VirtualFile?,
+  ): String {
     val rel = root?.let { VfsUtilCore.getRelativePath(vf, it, '/') }
     return (rel ?: vf.path).lowercase(Locale.ROOT)
   }

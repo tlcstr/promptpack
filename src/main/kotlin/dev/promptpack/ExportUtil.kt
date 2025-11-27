@@ -152,8 +152,7 @@ object ExportUtil {
               partsCount,
               chunkLimit,
             ),
-          )
-          .append("\n\n")
+          ).append("\n\n")
         if (treeHeaderOrEmpty.isNotBlank()) {
           append(treeHeaderOrEmpty).append('\n')
         }
@@ -162,7 +161,11 @@ object ExportUtil {
           .append('\n')
         for (p in partPaths) {
           val fn = p.fileName.toString()
-          append("- [").append(fn).append("](").append(fn).append(")\n")
+          append("- [")
+            .append(fn)
+            .append("](")
+            .append(fn)
+            .append(")\n")
         }
       }
     val idx = exportDir.resolve("index.md")

@@ -145,6 +145,7 @@ class PromptPackConfigurable :
 
   override fun isModified(): Boolean {
     val st = svc.state
+
     fun String.normalizeCsv(
       lowercase: Boolean = false,
       trimDots: Boolean = false,
@@ -173,7 +174,8 @@ class PromptPackConfigurable :
       pathPatternsField.text.normalizeCsv(lowercase = true).toMutableSet() != st.modulePathPatterns ||
       requirePublicCb.isSelected != st.moduleRequirePublicFolder ||
       // public
-      publicEnabledCb.isSelected != st.publicEnabled || // <— NEW
+      publicEnabledCb.isSelected != st.publicEnabled ||
+      // <— NEW
       publicNamesField.text.normalizeCsv(lowercase = true).toMutableSet() != st.publicFolderNames ||
       skipDupMainCb.isSelected != st.publicSkipDuplicatesInMain ||
       maxPerModuleField.text.trim().toIntOrNull() != st.publicMaxPerModule ||
@@ -182,6 +184,7 @@ class PromptPackConfigurable :
 
   override fun apply() {
     val st = svc.state
+
     fun String.normalizeCsv(
       lowercase: Boolean = false,
       trimDots: Boolean = false,
@@ -211,7 +214,7 @@ class PromptPackConfigurable :
     st.moduleRequirePublicFolder = requirePublicCb.isSelected
 
     // Public API
-    st.publicEnabled = publicEnabledCb.isSelected         // <— NEW
+    st.publicEnabled = publicEnabledCb.isSelected // <— NEW
     st.publicFolderNames = publicNamesField.text.normalizeCsv(lowercase = true).toMutableSet()
     st.publicSkipDuplicatesInMain = skipDupMainCb.isSelected
     st.publicMaxPerModule = maxPerModuleField.text.trim().toIntOrNull() ?: st.publicMaxPerModule
@@ -234,7 +237,7 @@ class PromptPackConfigurable :
     pathPatternsField.text = st.modulePathPatterns.joinToString(",")
     requirePublicCb.isSelected = st.moduleRequirePublicFolder
 
-    publicEnabledCb.isSelected = st.publicEnabled         // <— NEW
+    publicEnabledCb.isSelected = st.publicEnabled // <— NEW
     publicNamesField.text = st.publicFolderNames.joinToString(",")
     skipDupMainCb.isSelected = st.publicSkipDuplicatesInMain
     maxPerModuleField.text = st.publicMaxPerModule.toString()

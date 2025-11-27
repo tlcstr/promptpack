@@ -78,7 +78,8 @@ object ModuleDetector {
     }
 
     return res.toList().sortedBy {
-      VfsUtilCore.getRelativePath(it, root, '/')
+      VfsUtilCore
+        .getRelativePath(it, root, '/')
         ?.lc()
         ?: it.path.lc()
     }
@@ -129,7 +130,8 @@ object ModuleDetector {
     patterns: Set<String>,
   ): Boolean {
     val rel =
-      VfsUtilCore.getRelativePath(dir, projectRoot, '/')
+      VfsUtilCore
+        .getRelativePath(dir, projectRoot, '/')
         ?.lowercase(Locale.ROOT)
         ?: return false
     return patterns.any { pat -> glob(rel, pat.lowercase(Locale.ROOT)) }
@@ -138,7 +140,10 @@ object ModuleDetector {
   /**
    * Tiny glob: '*' (any run), '?' (single char). Anchored.
    */
-  private fun glob(text: String, pattern: String): Boolean {
+  private fun glob(
+    text: String,
+    pattern: String,
+  ): Boolean {
     val sb = StringBuilder("^")
     for (ch in pattern) {
       when (ch) {
